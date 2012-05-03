@@ -39,7 +39,9 @@
 
 '''Use avbin to decode audio and video media.
 '''
+from audio import AudioFormat
 from exceptions import MediaFormatException
+from video import VideoFormat
 
 __docformat__ = 'restructuredtext'
 __version__ = '$Id: avbin.py 2090 Jernej Virag $'
