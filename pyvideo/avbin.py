@@ -283,13 +283,18 @@ class AVbinSource(object):
         except:
             pass
 
-    def _seek(self, timestamp):
+    def seek(self, timestamp):
         av.avbin_seek_file(self._file, timestamp_to_avbin(timestamp))
         self._buffered_packets = []
         self._buffered_images = []
         self._audio_packet_size = 0
         self._force_next_video_image = True
         self._last_video_timestamp = None
+
+    def _get_duration(self):
+        return self._duration
+
+    duration = property(lambda self: self._get_duration())
 
     def _get_packet_for_stream(self, stream_index):
         # See if a packet has already been buffered

@@ -115,10 +115,12 @@ class ImageData(object):
         self._current_pitch = pitch
         self._current_data = data
 
-    def get_format(self):
+    def _get_format(self):
         return self._current_format
 
-    def get_pitch(self):
+    format = property(lambda self: self._get_format())
+
+    def _get_pitch(self):
         return self._current_format
 
     def get_region(self, x, y, width, height):
@@ -153,6 +155,14 @@ class ImageData(object):
         self._current_pitch = self.pitch
         self._current_texture = None
         self._current_mipmapped_texture = None
+
+    data = property(_get_data, _set_data,
+        doc='''The byte data of the image.  Read-write.
+
+        :deprecated: Use `get_data` and `set_data`.
+
+        :type: sequence of bytes, or str
+        ''')
 
     def _ensure_string_data(self):
         if type(self._current_data) is not str:
