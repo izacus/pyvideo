@@ -39,14 +39,15 @@
 
 '''Use avbin to decode audio and video media.
 '''
+from exceptions import MediaFormatException
 
 __docformat__ = 'restructuredtext'
 __version__ = '$Id: avbin.py 2090 Jernej Virag $'
 
 import ctypes
+import lib
 
-av = pyglet.lib.load_library('avbin',
-                             darwin='/usr/local/lib/libavbin.dylib')
+av = lib.load_avbin()
 
 AVBIN_RESULT_ERROR = -1
 AVBIN_RESULT_OK = 0
@@ -226,9 +227,7 @@ class AVbinSource(object):
                 if not stream:
                     continue
 
-                self.video_format = VideoFormat(
-                    width=info.u.video.width,
-                    height=info.u.video.height)
+                self.video_format = VideoFormat(width=info.u.video.width,height=info.u.video.height)
                 if info.u.video.sample_aspect_num != 0:
                     self.video_format.sample_aspect = (
                         float(info.u.video.sample_aspect_num) /
@@ -470,7 +469,3 @@ class AVbinSource(object):
         player._texture = None
 
 av.avbin_init()
-if pyglet.options['debug_media']:
-    av.avbin_set_log_level(AVBIN_LOG_DEBUG)
-else:
-    av.avbin_set_log_level(AVBIN_LOG_QUIET)
