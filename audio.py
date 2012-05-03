@@ -1,3 +1,5 @@
+import ctypes
+
 __author__ = 'Jernej Virag'
 
 class AudioFormat(object):
@@ -39,3 +41,58 @@ class AudioFormat(object):
         return '%s(channels=%d, sample_size=%d, sample_rate=%d)' % (
             self.__class__.__name__, self.channels, self.sample_size,
             self.sample_rate)
+
+class AudioData(object):
+    '''A single packet of audio data.
+
+    This class is used internally by pyglet.
+
+    :Ivariables:
+        `data` : str or ctypes array or pointer
+            Sample data.
+        `length` : int
+            Size of sample data, in bytes.
+        `timestamp` : float
+            Time of the first sample, in seconds.
+        `duration` : float
+            Total data duration, in seconds.
+
+    '''
+    def __init__(self, data, length, timestamp, duration):
+        self.data = data
+        self.length = length
+        self.timestamp = timestamp
+        self.duration = duration
+
+    def consume(self, bytes, audio_format):
+        '''Remove some data from beginning of packet.'''
+        if bytes == self.length:
+            self.data = None
+            self.length = 0
+            self.timestamp += self.duration
+            self.duration = 0.
+            return
+        elif bytes == 0:
+            return
+
+        if not isinstance(self.data, str):
+            # XXX Create a string buffer for the whole packet then
+            #     chop it up.  Could do some pointer arith here and
+            #     save a bit of data pushing, but my guess is this is
+            #     faster than fudging aruond with ctypes (and easier).
+            data = ctypes.create_string_buffer(self.length)
+            ctypes.memmove(data, self.data, self.length)
+            self.data = data
+        self.data = self.data[bytes:]
+        self.length -= bytes
+        self.duration -= bytes / float(audio_format.bytes_per_second)
+        self.timestamp += bytes / float(audio_format.bytes_per_second)
+
+    def get_string_data(self):
+        '''Return data as a string.'''
+        if type(self.data) is str:
+            return self.data
+
+        buf = ctypes.create_string_buffer(self.length)
+        ctypes.memmove(buf, self.data, self.length)
+        return buf.raw

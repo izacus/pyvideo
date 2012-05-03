@@ -39,9 +39,9 @@
 
 '''Use avbin to decode audio and video media.
 '''
-from audio import AudioFormat
+from audio import AudioFormat, AudioData
 from exceptions import MediaFormatException
-from video import VideoFormat
+from video import VideoFormat, ImageData
 
 __docformat__ = 'restructuredtext'
 __version__ = '$Id: avbin.py 2090 Jernej Virag $'
@@ -360,27 +360,6 @@ class AVbinSource(object):
                                                  ctypes.c_void_p)
             self._audio_packet_size = packet.size
 
-    def _init_texture(self, player):
-        if not self.video_format:
-            return
-
-        width = self.video_format.width
-        height = self.video_format.height
-        if gl_info.have_extension('GL_ARB_texture_rectangle'):
-            texture = image.Texture.create_for_size(
-                gl.GL_TEXTURE_RECTANGLE_ARB, width, height,
-                internalformat=gl.GL_RGB)
-        else:
-            texture = image.Texture.create_for_size(
-                gl.GL_TEXTURE_2D, width, height, internalformat=gl.GL_RGB)
-            if texture.width != width or texture.height != height:
-                texture = texture.get_region(0, 0, width, height)
-        player._texture = texture
-
-        # Flip texture coords (good enough for simple apps).
-        t = list(player._texture.tex_coords)
-        player._texture.tex_coords = t[9:12] + t[6:9] + t[3:6] + t[:3]
-
     def _decode_video_packet(self, packet):
         timestamp = timestamp_from_avbin(packet.timestamp)
         if self._skip_video:
@@ -396,9 +375,7 @@ class AVbinSource(object):
         if result < 0:
             return None
 
-        return BufferedImage(
-            image.ImageData(width, height, 'RGB', buffer, pitch),
-            timestamp)
+        return BufferedImage(ImageData(width, height, 'RGB', buffer, pitch), timestamp)
 
     def _next_image(self):
         img = None
