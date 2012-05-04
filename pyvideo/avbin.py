@@ -85,7 +85,7 @@ Timestamp = ctypes.c_int64
 class AVbinFileInfo(ctypes.Structure):
     _fields_ = [
         ('structure_size', ctypes.c_size_t),
-        ('n_streams', ctypes.c_int),
+        ('n_streams', ctypes.c_int32),
         ('start_time', Timestamp),
         ('duration', Timestamp),
         ('title', ctypes.c_char * 512),
@@ -100,18 +100,18 @@ class AVbinFileInfo(ctypes.Structure):
 
 class _AVbinStreamInfoVideo(ctypes.Structure):
     _fields_ = [
-        ('width', ctypes.c_uint),
-        ('height', ctypes.c_uint),
-        ('sample_aspect_num', ctypes.c_int),
-        ('sample_aspect_den', ctypes.c_int),
+        ('width', ctypes.c_uint32),
+        ('height', ctypes.c_uint32),
+        ('sample_aspect_num', ctypes.c_uint32),
+        ('sample_aspect_den', ctypes.c_uint32),
     ]
 
 class _AVbinStreamInfoAudio(ctypes.Structure):
     _fields_ = [
-        ('sample_format', ctypes.c_int),
-        ('sample_rate', ctypes.c_uint),
-        ('sample_bits', ctypes.c_uint),
-        ('channels', ctypes.c_uint),
+        ('sample_format', ctypes.c_uint32),
+        ('sample_rate', ctypes.c_uint32),
+        ('sample_bits', ctypes.c_uint32),
+        ('channels', ctypes.c_uint32),
     ]
 
 class _AVbinStreamInfoUnion(ctypes.Union):
@@ -123,7 +123,7 @@ class _AVbinStreamInfoUnion(ctypes.Union):
 class AVbinStreamInfo(ctypes.Structure):
     _fields_ = [
         ('structure_size', ctypes.c_size_t),
-        ('type', ctypes.c_int),
+        ('type', ctypes.c_uint32),
         ('u', _AVbinStreamInfoUnion)
     ]
 
@@ -131,7 +131,7 @@ class AVbinPacket(ctypes.Structure):
     _fields_ = [
         ('structure_size', ctypes.c_size_t),
         ('timestamp', Timestamp),
-        ('stream_index', ctypes.c_int),
+        ('stream_index', ctypes.c_int32),
         ('data', ctypes.POINTER(ctypes.c_uint8)),
         ('size', ctypes.c_size_t),
     ]
@@ -140,7 +140,7 @@ AVbinLogCallback = ctypes.CFUNCTYPE(None,
     ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p)
 
 av.avbin_get_version.restype = ctypes.c_int
-av.avbin_get_ffmpeg_revision.restype = ctypes.c_int
+av.avbin_get_ffmpeg_revision.restype = ctypes.c_int32
 av.avbin_get_audio_buffer_size.restype = ctypes.c_size_t
 av.avbin_have_feature.restype = ctypes.c_int
 av.avbin_have_feature.argtypes = [ctypes.c_char_p]
@@ -159,16 +159,16 @@ av.avbin_stream_info.argtypes = [AVbinFileP, ctypes.c_int,
                                  ctypes.POINTER(AVbinStreamInfo)]
 
 av.avbin_open_stream.restype = ctypes.c_void_p
-av.avbin_open_stream.argtypes = [AVbinFileP, ctypes.c_int]
+av.avbin_open_stream.argtypes = [AVbinFileP, ctypes.c_int32]
 av.avbin_close_stream.argtypes = [AVbinStreamP]
 
 av.avbin_read.argtypes = [AVbinFileP, ctypes.POINTER(AVbinPacket)]
 av.avbin_read.restype = AVbinResult
-av.avbin_decode_audio.restype = ctypes.c_int
+av.avbin_decode_audio.restype = ctypes.c_int32
 av.avbin_decode_audio.argtypes = [AVbinStreamP,
     ctypes.c_void_p, ctypes.c_size_t,
-    ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)]
-av.avbin_decode_video.restype = ctypes.c_int
+    ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+av.avbin_decode_video.restype = ctypes.c_int32
 av.avbin_decode_video.argtypes = [AVbinStreamP,
     ctypes.c_void_p, ctypes.c_size_t,
     ctypes.c_void_p]
@@ -199,6 +199,9 @@ class BufferedImage(object):
         self.timestamp = timestamp
 
 class AVbinSource(object):
+    audio_format = None
+    video_format = None
+
     def __init__(self, filename, file=None, skip_video=False):
         if file is not None:
             raise NotImplementedError('TODO: Load from file stream')
@@ -220,7 +223,7 @@ class AVbinSource(object):
         for i in range(file_info.n_streams):
             info = AVbinStreamInfo()
             info.structure_size = ctypes.sizeof(info)
-            av.avbin_stream_info(self._file, i, info)
+            av.avbin_stream_info(self._file, i, ctypes.byref(info))
 
             if (info.type == AVBIN_STREAM_TYPE_VIDEO and
                 not self._video_stream):
