@@ -145,6 +145,11 @@ av.avbin_get_audio_buffer_size.restype = ctypes.c_size_t
 av.avbin_have_feature.restype = ctypes.c_int
 av.avbin_have_feature.argtypes = [ctypes.c_char_p]
 
+avbin_has_multithreading = False
+if (av.avbin_have_feature("multithreading") == 1):
+    av.avbin_init_mt.restype = AVbinResult
+    avbin_has_multithreading = True
+
 av.avbin_init.restype = AVbinResult
 av.avbin_set_log_level.restype = AVbinResult
 av.avbin_set_log_level.argtypes = [AVbinLogLevel]
@@ -455,4 +460,12 @@ class AVbinSource(object):
     def _release_texture(self, player):
         player._texture = None
 
-av.avbin_init()
+if avbin_has_multithreading:
+    try:
+        import multiprocessing
+        av.avbin_init_mt(multiprocessing.cpu_count())
+    except ImportError:
+        avbin_has_multithreading = False
+        av.avbin_init()
+else:
+    av.avbin_init()
