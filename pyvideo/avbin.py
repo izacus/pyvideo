@@ -172,7 +172,7 @@ av.avbin_read.restype = AVbinResult
 av.avbin_decode_audio.restype = ctypes.c_int32
 av.avbin_decode_audio.argtypes = [AVbinStreamP,
     ctypes.c_void_p, ctypes.c_size_t,
-    ctypes.c_void_p, ctypes.POINTER(ctypes.c_size_t)]
+    ctypes.c_void_p, ctypes.POINTER(ctypes.c_int)]
 av.avbin_decode_video.restype = ctypes.c_int32
 av.avbin_decode_video.argtypes = [AVbinStreamP,
     ctypes.c_void_p, ctypes.c_size_t,
