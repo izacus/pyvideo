@@ -134,6 +134,7 @@ class AVbinPacket(ctypes.Structure):
         ('stream_index', ctypes.c_int32),
         ('data', ctypes.POINTER(ctypes.c_uint8)),
         ('size', ctypes.c_size_t),
+        ('is_keyframe', ctypes.c_byte)
     ]
 
 AVbinLogCallback = ctypes.CFUNCTYPE(None,
@@ -207,7 +208,7 @@ class AVbinSource(object):
     audio_format = None
     video_format = None
 
-    def __init__(self, filename, file=None, skip_video=False):
+    def __init__(self, filename, file=None, skip_video=False, keyframes_only=False):
         if file is not None:
             raise NotImplementedError('TODO: Load from file stream')
 
@@ -218,6 +219,7 @@ class AVbinSource(object):
         self._video_stream = None
         self._audio_stream = None
         self._skip_video = skip_video
+        self._keyframes_only = keyframes_only
 
         file_info = AVbinFileInfo()
         file_info.structure_size = ctypes.sizeof(file_info)
@@ -377,6 +379,9 @@ class AVbinSource(object):
         timestamp = timestamp_from_avbin(packet.timestamp)
         if self._skip_video:
             return BufferedImage(None, timestamp)
+
+        if self._keyframes_only and packet.is_keyframe != 1:
+            return None
 
         width = self.video_format.width
         height = self.video_format.height
