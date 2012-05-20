@@ -8,9 +8,11 @@ class DecodingPerformanceTests(TestCase):
 
     def testFullDecode(self):
         source = pyvideo.load("test_media/test_video.mp4")
+        self.assertIsNotNone(source.audio_format)
+        self.assertIsNotNone(source.video_format)
+
         timestamp = source.get_next_video_timestamp()
         self.assertIsNotNone(timestamp)
-
         while timestamp is not None:
             frame = source.get_next_video_frame()
             timestamp = source.get_next_video_timestamp()
