@@ -39,18 +39,31 @@
 
 '''Use avbin to decode audio and video media.
 '''
-from audio import AudioFormat, AudioData
-from exceptions import MediaFormatException
-from video import VideoFormat, ImageData
+import os
+from pyvideo.audio import AudioFormat, AudioData
+from pyvideo.exceptions import MediaFormatException
+from pyvideo.video import VideoFormat, ImageData
 
 __docformat__ = 'restructuredtext'
 __version__ = '$Id: avbin.py 2090 Jernej Virag $'
 
 import ctypes
-import lib
+import ctypes.util as c_util
 
-av = lib.load_avbin()
+def load_avbin():
+    """
+    Loads avbin library and returns it
+    """
 
+    if os.name == "nt":
+        lib = ctypes.cdll.LoadLibrary("avbin.dll")
+    else:
+        libname = c_util.find_library("avbin")
+        lib = ctypes.cdll.LoadLibrary(libname)
+
+    return lib
+
+av = load_avbin()
 AVBIN_RESULT_ERROR = -1
 AVBIN_RESULT_OK = 0
 AVbinResult = ctypes.c_int
