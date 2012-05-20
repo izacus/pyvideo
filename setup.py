@@ -4,7 +4,7 @@ from distutils.core import setup
 from Cython.Distutils import build_ext
 from Cython.Distutils.extension import Extension
 
-ext_modules = [Extension("avbin", ["pyvideo/avbin.pyx"])]
+ext_modules = [Extension("avbin", ["avbin.pyx"], libraries=["avbin"])]
 
 setup(name="PyVideo",
       version="0.1",
