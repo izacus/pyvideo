@@ -1,6 +1,7 @@
 import unittest
 from unittest.case import TestCase
 import pyvideo
+import cProfile
 
 class DecodingPerformanceTests(TestCase):
     def setUp(self):
@@ -26,4 +27,4 @@ class DecodingPerformanceTests(TestCase):
         pass
 
 if __name__ == "__main__":
-    unittest.main()
+    cProfile.run("unittest.main()", "test_profile")

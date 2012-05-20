@@ -1,3 +1,5 @@
+# cython: profile=True
+
 # ----------------------------------------------------------------------------
 # pyvideo
 # Copyright (c) 2011- Jernej Virag
