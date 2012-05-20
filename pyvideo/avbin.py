@@ -336,13 +336,11 @@ class AVbinSource(object):
             elif self._packet.stream_index in self._buffer_streams:
                 self._buffered_packets.append(BufferedPacket(self._packet))
 
-    def _get_audio_data(self, bytes):
-        # XXX bytes currently ignored
+    def get_audio_data(self):
         while True:
             while self._audio_packet_size > 0:
                 size_out = ctypes.c_int(len(self._audio_buffer))
 
-                #print self._audio_stream, self._audio_packet_ptr, self._audio_packet_size, self._audio_buffer, size_out
                 used = av.avbin_decode_audio(self._audio_stream,
                     self._audio_packet_ptr, self._audio_packet_size,
                     self._audio_buffer, size_out)
