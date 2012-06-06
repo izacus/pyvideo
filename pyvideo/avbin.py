@@ -1,6 +1,6 @@
 # ----------------------------------------------------------------------------
 # pyvideo
-# Copyright (c) 2011- Jernej Virag
+# Copyright (c) 2012 Jernej Virag
 #
 # Modifications based on pyglet avbin.py
 #
