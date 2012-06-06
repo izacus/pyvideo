@@ -18,7 +18,7 @@ class DecodingComplianceTests(TestCase):
         self.assertEqual(audio_format.sample_rate, 48000)
 
     def testFullDecode(self):
-        source = pyvideo.load("test_media/victoria.webm")
+        source = pyvideo.load("test_media/test_media.webm")
         self.assertIsNotNone(source.audio_format)
         self.assertIsNotNone(source.video_format)
 
